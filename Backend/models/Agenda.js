@@ -128,7 +128,7 @@ class Agenda {
             FROM agendas a
             JOIN clientes c ON a.cliente_id = c.id
             JOIN profissionais p ON a.profissional_id = p.id
-            WHERE a.data_consulta BETWEEN NOW() AND DATE_ADD(NOW(), INTERVAL 24 HOUR)
+            WHERE a.data_consulta BETWEEN NOW() AND DATE_ADD(NOW(), INTERVAL 48 HOUR)
             AND a.status = 'agendado'
             AND a.lembrete_enviado = 0
         `);
