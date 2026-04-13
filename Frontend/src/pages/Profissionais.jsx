@@ -2,18 +2,55 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../services/api';
+import { CLOUDINARY_CLOUD_NAME, CLOUDINARY_UPLOAD_PRESET } from '../config/cloudinary';
 
 function Profissionais() {
     const [profissionais, setProfissionais] = useState([]);
     const [showModal, setShowModal] = useState(false);
     const [editingProfissional, setEditingProfissional] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [uploadando, setUploadando] = useState(false);
     const [formData, setFormData] = useState({
         nome: '',
         especialidade: '',
         foto_url: ''
     });
     const navigate = useNavigate();
+
+    const abrirWidgetCloudinary = () => {
+        if (!window.cloudinary) {
+            alert('Widget do Cloudinary não carregado. Verifique a conexão.');
+            return;
+        }
+        setUploadando(true);
+        const widget = window.cloudinary.createUploadWidget(
+            {
+                cloudName: CLOUDINARY_CLOUD_NAME,
+                uploadPreset: CLOUDINARY_UPLOAD_PRESET,
+                sources: ['local', 'camera'],
+                multiple: false,
+                cropping: true,
+                croppingAspectRatio: 1,
+                folder: 'profissionais',
+                language: 'pt',
+                text: { pt: { or: 'ou', menu: { files: 'Meus Arquivos', camera: 'Câmera' } } },
+            },
+            (error, result) => {
+                if (error) {
+                    console.error('Erro no upload:', error);
+                    setUploadando(false);
+                }
+                if (result.event === 'success') {
+                    setFormData(prev => ({ ...prev, foto_url: result.info.secure_url }));
+                    setUploadando(false);
+                }
+                if (result.event === 'close') {
+                    setUploadando(false);
+                }
+            }
+        );
+        widget.open();
+    };
 
     useEffect(() => {
         carregarProfissionais();
@@ -219,42 +256,59 @@ function Profissionais() {
                                 </div>
 
                                 <div className="form-group">
-                                    <label>URL da Foto (opcional):</label>
-                                    <input
-                                        type="text"
-                                        value={formData.foto_url}
-                                        onChange={(e) => setFormData({...formData, foto_url: e.target.value})}
-                                        placeholder="https://exemplo.com/foto.jpg"
-                                    />
-                                    <small style={{ color: '#666', fontSize: '12px' }}>
-                                        Cole a URL de uma imagem online
-                                    </small>
-                                </div>
-
-                                {formData.foto_url && (
-                                    <div className="form-group">
-                                        <label>Pré-visualização:</label>
-                                        <div style={{ 
-                                            marginTop: '0.5rem',
-                                            display: 'flex', 
-                                            justifyContent: 'center' 
-                                        }}>
-                                            <img 
-                                                src={formData.foto_url} 
-                                                alt="Pré-visualização"
-                                                style={{ 
-                                                    maxWidth: '100px', 
-                                                    maxHeight: '100px',
-                                                    borderRadius: '8px',
-                                                    border: '1px solid #ddd'
-                                                }}
-                                                onError={(e) => {
-                                                    e.target.style.display = 'none';
+                                    <label>Foto do Profissional (opcional):</label>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginTop: '0.5rem' }}>
+                                        {formData.foto_url ? (
+                                            <img
+                                                src={formData.foto_url}
+                                                alt="Foto do profissional"
+                                                style={{
+                                                    width: '70px',
+                                                    height: '70px',
+                                                    borderRadius: '50%',
+                                                    objectFit: 'cover',
+                                                    border: '2px solid #667eea'
                                                 }}
                                             />
+                                        ) : (
+                                            <div style={{
+                                                width: '70px',
+                                                height: '70px',
+                                                borderRadius: '50%',
+                                                background: '#e9ecef',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                fontSize: '24px'
+                                            }}>
+                                                👤
+                                            </div>
+                                        )}
+                                        <div>
+                                            <button
+                                                type="button"
+                                                onClick={abrirWidgetCloudinary}
+                                                disabled={uploadando}
+                                                style={{
+                                                    padding: '0.5rem 1rem',
+                                                    background: '#667eea',
+                                                    color: 'white',
+                                                    border: 'none',
+                                                    borderRadius: '5px',
+                                                    cursor: uploadando ? 'not-allowed' : 'pointer',
+                                                    opacity: uploadando ? 0.7 : 1,
+                                                    fontSize: '14px'
+                                                }}
+                                                aria-label="Enviar foto para a nuvem"
+                                            >
+                                                {uploadando ? 'Enviando...' : '☁️ Enviar foto'}
+                                            </button>
+                                            <small style={{ display: 'block', color: '#666', fontSize: '11px', marginTop: '4px' }}>
+                                                Armazenado no Cloudinary
+                                            </small>
                                         </div>
                                     </div>
-                                )}
+                                </div>
                                 
                                 <div className="modal-actions">
                                     <button type="button" onClick={resetForm}>

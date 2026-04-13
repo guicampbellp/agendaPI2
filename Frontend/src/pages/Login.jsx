@@ -31,33 +31,43 @@ function Login({ setIsAuthenticated }) {
 
     return (
         <div className="login-container">
-            <form onSubmit={handleSubmit} className="login-form">
+            <form onSubmit={handleSubmit} className="login-form" aria-label="Formulário de login">
                 <h2>Agenda Médica - Login</h2>
-                {erro && <div className="erro">{erro}</div>}
-                
+                {erro && (
+                    <div className="erro" id="erro-login" role="alert" aria-live="polite">
+                        {erro}
+                    </div>
+                )}
+
                 <div style={{ marginBottom: '1rem' }}>
+                    <label htmlFor="email" className="form-label">E-mail</label>
                     <input
+                        id="email"
                         type="email"
-                        placeholder="E-mail"
+                        placeholder="admin@clinica.com"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         required
                         disabled={carregando}
+                        aria-describedby={erro ? 'erro-login' : undefined}
                     />
                 </div>
-                
+
                 <div style={{ marginBottom: '1.5rem' }}>
+                    <label htmlFor="senha" className="form-label">Senha</label>
                     <input
+                        id="senha"
                         type="password"
-                        placeholder="Senha"
+                        placeholder="••••••"
                         value={senha}
                         onChange={(e) => setSenha(e.target.value)}
                         required
                         disabled={carregando}
+                        aria-describedby={erro ? 'erro-login' : undefined}
                     />
                 </div>
-                
-                <button type="submit" disabled={carregando}>
+
+                <button type="submit" disabled={carregando} aria-busy={carregando}>
                     {carregando ? 'Entrando...' : 'Entrar'}
                 </button>
                 

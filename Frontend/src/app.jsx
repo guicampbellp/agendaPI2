@@ -13,6 +13,7 @@ import Clientes from "./pages/Clientes";
 import Profissionais from "./pages/Profissionais";
 import Estatisticas from "./pages/Estatisticas";
 import ConfigAgenda from "./pages/ConfigAgenda";
+import AccessibilityWidget from "./components/AccessibilityWidget";
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(null); // Começa como null
@@ -50,6 +51,7 @@ function App() {
 
   return (
     <Router>
+      <AccessibilityWidget />
       <Routes>
         <Route
           path="/login"

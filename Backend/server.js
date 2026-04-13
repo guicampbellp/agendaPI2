@@ -6,7 +6,6 @@ const authRoutes = require('./routes/auth');
 const agendaRoutes = require('./routes/agendas');
 const clienteRoutes = require('./routes/clientes');
 const profissionalRoutes = require('./routes/profissionais');
-const SMSService = require('./services/smsService');
 const estatisticasRoutes = require('./routes/estatisticas');
 
 const app = express();
@@ -21,11 +20,16 @@ app.use('/api/clientes', clienteRoutes);
 app.use('/api/profissionais', profissionalRoutes);
 app.use('/api/estatisticas', estatisticasRoutes);
 
-// Iniciar agendador de lembretes
+// Iniciar agendador de lembretes via SMS
+const SMSService = require('./services/smsService');
 SMSService.iniciarAgendador();
 
 
-const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => {
-    console.log(`Servidor rodando na porta ${PORT}`);
-});
+module.exports = app;
+
+if (require.main === module) {
+    const PORT = process.env.PORT || 3001;
+    app.listen(PORT, () => {
+        console.log(`Servidor rodando na porta ${PORT}`);
+    });
+}

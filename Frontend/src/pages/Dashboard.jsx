@@ -68,26 +68,31 @@ function Dashboard({ setIsAuthenticated }) {
         </nav>
       </header>
 
-      <main style={{ padding: '2rem' }}>
-        <div style={{ 
-          background: 'white', 
-          borderRadius: '10px', 
+      <main id="main-content" style={{ padding: '2rem' }}>
+        <div style={{
+          background: 'white',
+          borderRadius: '10px',
           boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
           padding: '2rem',
           marginBottom: '2rem'
         }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
             <h2>Pacientes do Dia</h2>
-            <input
-              type="date"
-              value={dataSelecionada}
-              onChange={(e) => setDataSelecionada(e.target.value)}
-              style={{ padding: '0.5rem', border: '1px solid #ddd', borderRadius: '5px' }}
-            />
+            <label htmlFor="data-pacientes" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '14px', color: '#666' }}>
+              Data:
+              <input
+                id="data-pacientes"
+                type="date"
+                value={dataSelecionada}
+                onChange={(e) => setDataSelecionada(e.target.value)}
+                aria-label="Selecionar data dos pacientes"
+                style={{ padding: '0.5rem', border: '1px solid #ddd', borderRadius: '5px' }}
+              />
+            </label>
           </div>
 
           {loading ? (
-            <div>Carregando...</div>
+            <div role="status" aria-live="polite">Carregando...</div>
           ) : agendamentosHoje.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '2rem', color: '#666' }}>
               Nenhum agendamento para esta data
@@ -128,9 +133,11 @@ function Dashboard({ setIsAuthenticated }) {
                     </p>
                   </div>
                   
-                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <div style={{ display: 'flex', gap: '0.5rem' }} role="group" aria-label={`Presença de ${agendamento.nome_cliente}`}>
                     <button
                       onClick={() => atualizarPresenca(agendamento.id, 'sim')}
+                      aria-label={`Confirmar presença de ${agendamento.nome_cliente}`}
+                      aria-pressed={agendamento.paciente_compareceu === 'sim'}
                       style={{
                         padding: '0.5rem 1rem',
                         background: agendamento.paciente_compareceu === 'sim' ? '#28a745' : '#6c757d',
@@ -140,10 +147,12 @@ function Dashboard({ setIsAuthenticated }) {
                         cursor: 'pointer'
                       }}
                     >
-                      ✅ Sim
+                      Compareceu
                     </button>
                     <button
                       onClick={() => atualizarPresenca(agendamento.id, 'nao')}
+                      aria-label={`Registrar falta de ${agendamento.nome_cliente}`}
+                      aria-pressed={agendamento.paciente_compareceu === 'nao'}
                       style={{
                         padding: '0.5rem 1rem',
                         background: agendamento.paciente_compareceu === 'nao' ? '#dc3545' : '#6c757d',
@@ -153,7 +162,7 @@ function Dashboard({ setIsAuthenticated }) {
                         cursor: 'pointer'
                       }}
                     >
-                      ❌ Não
+                      Faltou
                     </button>
                   </div>
                 </div>
@@ -162,31 +171,40 @@ function Dashboard({ setIsAuthenticated }) {
           )}
         </div>
 
-        <div style={{
+        <nav aria-label="Módulos do sistema" style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
           gap: '1rem',
         }}>
-          <div style={{ padding: '1rem', background: '#e8f4fd', borderRadius: '5px' }}>
-            <h3>📅 Agendamentos</h3>
-            <p>Gerencie os agendamentos de consultas</p>
-          </div>
-
-          <div style={{ padding: '1rem', background: '#f0f8f0', borderRadius: '5px' }}>
-            <h3>👥 Clientes</h3>
-            <p>Cadastre e gerencie pacientes</p>
-          </div>
-
-          <div style={{ padding: '1rem', background: '#fef7e0', borderRadius: '5px' }}>
-            <h3>👨‍⚕️ Profissionais</h3>
-            <p>Gerencie a equipe médica</p>
-          </div>
-
-          <div style={{ padding: '1rem', background: '#ffeef0', borderRadius: '5px' }}>
-            <h3>📊 Estatísticas</h3>
-            <p>Relatórios e gráficos</p>
-          </div>
-        </div>
+          {[
+            { to: '/agendas', icon: '📅', label: 'Agendamentos', desc: 'Gerencie os agendamentos de consultas', bg: '#e8f4fd', border: '#90c5f0' },
+            { to: '/clientes', icon: '👥', label: 'Clientes', desc: 'Cadastre e gerencie pacientes', bg: '#f0f8f0', border: '#90d490' },
+            { to: '/profissionais', icon: '👨‍⚕️', label: 'Profissionais', desc: 'Gerencie a equipe médica', bg: '#fef7e0', border: '#f0d060' },
+            { to: '/estatisticas', icon: '📊', label: 'Estatísticas', desc: 'Relatórios e gráficos', bg: '#ffeef0', border: '#f0a0b0' },
+          ].map(({ to, icon, label, desc, bg, border }) => (
+            <Link
+              key={to}
+              to={to}
+              aria-label={label}
+              style={{
+                display: 'block',
+                padding: '1.25rem',
+                background: bg,
+                borderRadius: '10px',
+                border: `1px solid ${border}`,
+                textDecoration: 'none',
+                color: '#333',
+                transition: 'transform 0.15s, box-shadow 0.15s',
+              }}
+              onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)'; }}
+              onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = ''; }}
+            >
+              <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>{icon}</div>
+              <h3 style={{ margin: '0 0 0.25rem', fontSize: '1rem' }}>{label}</h3>
+              <p style={{ margin: 0, fontSize: '13px', color: '#666' }}>{desc}</p>
+            </Link>
+          ))}
+        </nav>
       </main>
     </div>
   );
